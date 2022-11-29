@@ -1,4 +1,4 @@
-# Houdini VEX/Python
+# Houdini VEX/Hscript
  Collection of scripts I've developed
 
 Houdini VEX and Python scripts
