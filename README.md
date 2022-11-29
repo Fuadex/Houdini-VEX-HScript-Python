@@ -11,14 +11,14 @@ I thought that, maybe I could actually do my own preroll and I sorta ended up ge
 
 Chuck down a timeshift set to beginning of shot (preroll) and another with actual beginning of the shot. Plug both into a point wrangle.
 
-vector P1 = point(0,"P",@ptnum);
-vector P2 = point(1,"P",@ptnum);
-int T1 = $RFSTART;
-int T2 = $RFSTART + 100;
-float shot_length = fit(@Frame,t1,t2,0,1);
-float ramp = chramp("Translate",shot_length);
+	vector P1 = point(0,"P",@ptnum);
+	vector P2 = point(1,"P",@ptnum);
+	int T1 = $RFSTART;
+	int T2 = $RFSTART + 100;
+	float shot_length = fit(@Frame,t1,t2,0,1);
+	float ramp = chramp("Translate",shot_length);
 
-v@P = P1+(P1-P2)*ramp*-1;
+	v@P = P1+(P1-P2)*ramp*-1;
 
 Set the ramp to have a smooth transition, with B-Spline or whatever.
 Incoming anim geo can end up being heavy and having it load frame by frame, unpacked, converted for collisions etc. can siphon quite a bit of time.
@@ -31,12 +31,12 @@ Well, turns out that, duh, obviously, stiffness stuff in vellum operates in expo
 
 So....? Say, you want to remap stiffness properly between specific frames, here's what you need and best sourced outside of dops.
 
-i@frame_start = $FSTART;
-i@frame_end = $FEND;
-f@stiffness = 1;
-f@exponent = fit(@Frame,i@frame_start,i@frame_end,-10,5);
+	i@frame_start = $FSTART;
+	i@frame_end = $FEND;
+	f@stiffness = 1;
+	f@exponent = fit(@Frame,i@frame_start,i@frame_end,-10,5);
 
-f@remap = 1 * pow(10,@exponent);
+	f@remap = 1 * pow(10,@exponent);
 
 Now this will remap stiffness the way you'd think it logically should.
 
