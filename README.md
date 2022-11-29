@@ -51,16 +51,16 @@ Well, most of the time I peak in the anim geo and then slowly animate it outward
 I thought of a very simple solution really - just split some part of the geo you're interested in, can be procedural or not you decide - extract centroid
 Now into a pointwrangle
 
-//vector P1 = point(0,"P",0);
-vector P2 = point(1,"P",0);
-float min = chf("minimum");
-float max = chf("maximum");
+	//vector P1 = point(0,"P",0);
+	vector P2 = point(1,"P",0);
+	float min = chf("minimum");
+	float max = chf("maximum");
 
-float ratio = chf("ratio");
-float dist = distance(v@P,P2);
-float remap = fit(dist,min,max,1,0);
+	float ratio = chf("ratio");
+	float dist = distance(v@P,P2);
+	float remap = fit(dist,min,max,1,0);
 
-v@P = v@P + (v@P-P2)*-(ratio)*remap;
+	v@P = v@P + (v@P-P2)*-(ratio)*remap;
 
 So, you're probably wondering what does this do - best I can describe it, it's like a metaball - you pull all the points towards a specific direction
 Simple script as hell, you can add more points, maybe not have one point but a point cloud instead, whatever - but heck, vector maths are king.
@@ -71,16 +71,15 @@ Wrangle blendshape
 
 This one's easy - I mean it's just a blendshape but I always hated the idea of trying to recreate this, so I just did once after leaving Fin
 
+	vector P1 = point(1,"P",@ptnum);
+	vector P2 = point(0,"P",@ptnum);
+	vector deltaP = P2 - P1;
 
-vector P1 = point(1,"P",@ptnum);
-vector P2 = point(0,"P",@ptnum);
-vector deltaP = P2 - P1;
+	float offset=ch("offset");
+	float foo = clamp((f@float_variable+offset),-1,1);
+	float scale = chramp("ramppos",foo);
 
-float offset=ch("offset");
-float foo = clamp((f@float_variable+offset),-1,1);
-float scale = chramp("ramppos",foo);
-
-v@P = P1 + (scale*deltaP);
+	v@P = P1 + (scale*deltaP);
 
 I mean, again - it's just a blendshape, as long as point count is the same - you can just blend all the points and actually do this based on a mask of your choosing, which actually it's reallly powerful.
 
@@ -90,36 +89,36 @@ Vector push and direction estimation
 
 Very simple push by a vector direction
 
-vector dir1 = set(0,0,0);
-vector dir2 = set(1,1,1);
-v@P += dir2 * chf("magnitude");
+	vector dir1 = set(0,0,0);
+	vector dir2 = set(1,1,1);
+	v@P += dir2 * chf("magnitude");
 
 It just moves man. That's for a pointwrangle. But actually, maybe we can do this more efficiently, huh?
 
 Detail wrangle version, to estimate the direction of a curve. I used this to variably switch point and uv count on some curves back in the CFX days.
 I'm sure there's a neater trick but as a quick and dirty method, even if the curve goes up and down and sideways, it should work.
 
-vector dir;
+	vector dir;
 
-for(int=0; i<nprimitives(0); i++){
+	for(int=0; i<nprimitives(0); i++){
 
-	dir += prim(0,"N",i);
-	dir = normalize(dir);
-}
+		dir += prim(0,"N",i);
+		dir = normalize(dir);
+	}
 
 Calculate vector direction - Barebones style
 
 Chuck down a Resample node, get the tangents then detail wrangle
 
-v[]@tangentu_array;
-v@vector_sum;
+	v[]@tangentu_list;
+	v@vector_sum;
 
-for(int i=0; i<@numpt; i++){
-vector tangentu_point = point(0,"tangentu",i);
-append(@tangentu_array, tangentu_point);
-}
+	for(int i=0; i<@numpt; i++){
+	vector tangentu_pt = point(0,"tangentu",i);
+	append(@tangentu_list, tangentu_pt);
+	}
 
-@vector_sum = sum(@tangentu_array)/len(@tangentu_array);
+	@vector_sum = sum(@tangentu_list)/len(@tangentu_list);
 
 
 -------------------------------------------------------
