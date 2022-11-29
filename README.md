@@ -1,7 +1,9 @@
 # Houdini VEX/Hscript
  Collection of scripts I've developed
 
-Houdini VEX and Python scripts
+Houdini VEX and a bit of Hscript for now.
+
+-----------------------------------------------
 
 CharFX Preroll Fix
 
