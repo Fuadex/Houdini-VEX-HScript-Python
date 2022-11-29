@@ -5,7 +5,7 @@ Houdini VEX and Python scripts
 
 CharFX Preroll Fix
 
-I came across a few instances while working on cloth simulations, when the preroll didn't exactly end up smoothly at the end of the preroll. What's preroll? Well, for any charfx it's extra frames which may range between 15-30-50-100 frames so that once shot goes in motion, it's already settled or continuing from previous shot.
+I came across a few instances while working on cloth simulations, when the preroll didn't exactly end up smoothly at the end of the preroll. What's preroll? Well, for any simulated asset it's extra frames which may range between 15-30-50-100 frames so that once shot goes in motion, it's already settled or continuing from previous shot.
 Anyway, it's a bit of a process setting up metadata, getting the animator to publish a new cache and this stuff is fairly automatized anyway in most circumstances but sometimes you still end up getting a bit of a blank, that kind of screams for a kickback to anim.
 I thought that, maybe I could actually do my own preroll and I sorta ended up getting the exact smooth transition but also I managed to optimize simulation time at once. How?
 
@@ -26,10 +26,10 @@ This kinda hunts down two birds with one stone.
 
 As an extra thing - Vellum ramping
 
-I had a problem that I couldn't crack easy. I mean, remapping values is cool and all until you need to remap vellum values at dop level and it's stiffness stuff. I couldn't exactly comprehend why my maths were failing or was it my head that was failing or is everything failing? Who knows, where am I etc. etc.
+I had a problem that I couldn't crack easily. I mean, remapping values is cool and all until you need to remap vellum values at dop level and it's stiffness stuff. I couldn't exactly comprehend why my maths were failing or was it my head that was failing or is everything failing? etc. etc.
 Well, turns out that, duh, obviously, stiffness stuff in vellum operates in exponential values of 10 to the power of whatevs. So really, remapping should function in relation to the exponent itself.
 
-So....? Say, you want to remap stiffness properly between specific frames, here's what you need and best sourced outside of dops.
+So....? Say, you want to remap stiffness properly between specific frames, here's what you need and best sourced outside of dops. For sanity reasons.
 
 	i@frame_start = $FSTART;
 	i@frame_end = $FEND;
@@ -38,15 +38,15 @@ So....? Say, you want to remap stiffness properly between specific frames, here'
 
 	f@remap = 1 * pow(10,@exponent);
 
-Now this will remap stiffness the way you'd think it logically should.
+Now this will remap stiffness the way you'd think it logically should. And if you're after some smooth stiffness increase/decrease that just simply looks good, this is the stuff.
 
 --------------------------------------------------------
 
-CharFX vector deformation
+CharFX vector deformation and Bend node
 
-This one I thought of waaay to late and should've come up with this a long time ago.
-Say, you've got cloth geo and a collider anim but the anim is at rest but still collides initially with cloth. What do you do?
-Well, most of the time I peak in the anim geo and then slowly animate it outwards but you can't always do this as collision geo can be... hmmm... multilayered.
+This one I thought of waaay too late and should've come up with this a long time ago.
+Say, you've got cloth geo and a collider anim and anim is at rest but collides initially with cloth. What do you do?
+Well, most of the time I'd peak in the anim geo and then slowly animate it outwards but you can't always do this as collision geo can have have extrusions or crawl up into itself.
 
 I thought of a very simple solution really - just split some part of the geo you're interested in, can be procedural or not you decide - extract centroid
 Now into a pointwrangle
@@ -59,17 +59,20 @@ Now into a pointwrangle
 	float ratio = chf("ratio");
 	float dist = distance(v@P,P2);
 	float remap = fit(dist,min,max,1,0);
+	//float bend = chramp("bend",remap);
 
-	v@P = v@P + (v@P-P2)*-(ratio)*remap;
+	v@P = v@P + (v@P-P2)*-(ratio)*remap; //use bend instead of remap!
 
 So, you're probably wondering what does this do - best I can describe it, it's like a metaball - you pull all the points towards a specific direction
 Simple script as hell, you can add more points, maybe not have one point but a point cloud instead, whatever - but heck, vector maths are king.
+
+You know what's also an option? I had a problem with which using a Bend node was a no-no due to the thing stretching in mysterious ways. So what did my little brain think of? Ha, custom bend node! I mean it's essentially the same thing but... include a chramp based on the remapped value and you can also create your own vector. I put it commented out if you'd try to take it for a spin yourself.
 
 ----------------------------------------------------------
 
 Wrangle blendshape
 
-This one's easy - I mean it's just a blendshape but I always hated the idea of trying to recreate this, so I just did once after leaving Fin
+This one's easy - I mean it's just a blendshape but I always hated the idea of trying to recreate this, so I just did once after leaving Fin because I knew if I didn't try recreating straight afterwards I'd probably end up spending way too much time doing this after completing my break.
 
 	vector P1 = point(1,"P",@ptnum);
 	vector P2 = point(0,"P",@ptnum);
@@ -95,8 +98,7 @@ Very simple push by a vector direction
 
 It just moves man. That's for a pointwrangle. But actually, maybe we can do this more efficiently, huh?
 
-Detail wrangle version, to estimate the direction of a curve. I used this to variably switch point and uv count on some curves back in the CFX days.
-I'm sure there's a neater trick but as a quick and dirty method, even if the curve goes up and down and sideways, it should work.
+Detail wrangle version. To be frank, I'm not entirely sure what I use this one for but I'll get back to ya soon, k?
 
 	vector dir;
 
@@ -106,7 +108,10 @@ I'm sure there's a neater trick but as a quick and dirty method, even if the cur
 		dir = normalize(dir);
 	}
 
-Calculate vector direction - Barebones style
+Calculate vector
+
+This one I used to estimate the direction of a curve. I used this to variably switch point and uv count on some curves back in the CFX days.
+I'm sure there's a neater trick but as a quick and dirty method, even if the curve goes up and down and sideways, it should work.
 
 Chuck down a Resample node, get the tangents then detail wrangle
 
@@ -147,14 +152,14 @@ It's simple.
 	float ramp = chramp("ramp",spread);
 	@Cd.r = ramp; //color red along the y axis of the object's bounding box
 
-It's really cool beans.
+It's really cool beans. So handy. And there are intrinsics like that for primitives as well!
 
 
 --------------------------------------------------------
 
 Calculate radius
 
-Boooring. But was still cool to give this a crack. Won't work for everything but when you need stuff calculated per object, it could work nicely in a detail wrangle and in a node-based for loop from connectivity.
+Boooring. But was still cool to give this a crack as I had a task in which I had to calculate radius of every single wire. Won't work for everything but when you need stuff calculated per object, it could work nicely in a detail wrangle and in a node-based for loop from connectivity. Ideally I'd spice this up to make sure it always worked but you can't always negotiate what sort of geo you'll be getting as a present today.
 
 	float length[];
 
@@ -174,7 +179,9 @@ Boooring. But was still cool to give this a crack. Won't work for everything but
 
 -------------------------------------------------------
 
-Sometimes, I had issues, needing to select multiple things in code but not being able to do it in a neat way
+Find matchmaker
+
+Sometimes, I had issues, needing to select multiple things in code but not being able to do it in a neat way.
 Here's a few cool approaches
 
 	int last[] = primpoints(0,@primnum)[-2:];
@@ -198,7 +205,7 @@ Custom deformer
 
 Say you're in a situation in which a shot begins with a character colliding with another object. You can get some stuff right with preroll but when your thing begins from already colliding with another thing, what can you do?
 Well, took me a while to crack this and this was still not an ideal solution but it's a cool solution nevertheless. Whenever I can, I try going at problems procedurally but sometimes you need to work with a previous frame.
-So... solver time! And time to break your head trying to figure out in your brain how to solve a problem. Here's a solution it took me about 2 hours to crack.
+So... solver time! And time to crack your head trying to figure out in your brain how to solve a problem. Here's a solution it took me about 2 hours to crack.
 
 Have a wrangle. Put a switch upstream to use first input at first frame and moving forward the previous frame.
 Make sure you plug in your first input to keep track of the changing points position.
@@ -236,7 +243,7 @@ But you know what? I've got a variation of this.
 	@P = @P + normalize(velocity) * speed / 24;
 
 Almost the same thing, except it takes consideration of the distance from a very specific point that you can set yourself!
-This one was very much work in progress I mad an attempt to get very specific collisions out of the way but heh, doing it based on sdf or a point or whatever helps you achieve your dreams!
+This one was very much work in progress I made in an attempt to get very specific collisions out of the way but heh, doing it based on sdf or a point or whatever helps you achieve your dreams!
 
 ------------------------------------------------------
 
