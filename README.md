@@ -127,25 +127,25 @@ In Relation Operations
 
 Once upon a time I believed in relpointbbox. For instance, if I wanted to vary up attribs based on height, like with this
 
-vector relative = relpointbbox(0,@P);
-float multiplier = chf("multiplier");
+	vector relative = relpointbbox(0,@P);
+	float multiplier = chf("multiplier");
 
-f@Relative_y = chramp("Height",relative[1])*multiplier;
+	f@Relative_y = chramp("Height",relative[1])*multiplier;
 
 Yup, that works but bbox was always a bit of a weird pain for me. When watching Junichiro Horikawa's VEX series, I go into intrinsics and hey, I luv em!
 
 It's simple.
 
-float bounds[] = detailintrinsic(0,"bounds");
-float bounds_ymin = bounds[2];
-float bounds_ymax = bounds[3];
+	float bounds[] = detailintrinsic(0,"bounds");
+	float bounds_ymin = bounds[2];
+	float bounds_ymax = bounds[3];
 
-//And you do logic.
-//Such as this.
+	//And you do logic.
+	//Such as this.
 
-float spread = fit(v@P, bounds_ymin, bounds_ymax,0,1);
-float ramp = chramp("ramp",spread);
-@Cd.r = ramp; //color red along the y axis of the object's bounding box
+	float spread = fit(v@P, bounds_ymin, bounds_ymax,0,1);
+	float ramp = chramp("ramp",spread);
+	@Cd.r = ramp; //color red along the y axis of the object's bounding box
 
 It's really cool beans.
 
