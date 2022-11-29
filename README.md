@@ -105,7 +105,6 @@ Detail wrangle version. To be frank, I'm not entirely sure what I use this one f
 	vector dir;
 
 	for(int=0; i<nprimitives(0); i++){
-
 		dir += prim(0,"N",i);
 		dir = normalize(dir);
 	}
@@ -121,8 +120,8 @@ Chuck down a Resample node, get the tangents then detail wrangle
 	v@vector_sum;
 
 	for(int i=0; i<@numpt; i++){
-	vector tangentu_pt = point(0,"tangentu",i);
-	append(@tangentu_list, tangentu_pt);
+		vector tangentu_pt = point(0,"tangentu",i);
+		append(@tangentu_list, tangentu_pt);
 	}
 
 	@vector_sum = sum(@tangentu_list)/len(@tangentu_list);
