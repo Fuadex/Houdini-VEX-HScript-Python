@@ -157,21 +157,21 @@ Calculate radius
 
 Boooring. But was still cool to give this a crack. Won't work for everything but when you need stuff calculated per object, it could work nicely in a detail wrangle and in a node-based for loop from connectivity.
 
-float length[];
+	float length[];
 
-for(int i=0;i<numpt-1;i++){
-	vector pt1 = point(0,"P",i);
-	vecotr pt2 = point(0,"P",i+1);
-	float measure = distance(pt1,pt2);
-	push(length,measure);
-}
+	for(int i=0;i<numpt-1;i++){
+		vector pt1 = point(0,"P",i);
+		vecotr pt2 = point(0,"P",i+1);
+		float measure = distance(pt1,pt2);
+		push(length,measure);
+	}
 
 	vector pt1 = point(0,"P",0);
 	vecotr pt2 = point(0,"P",@numpt-1);
 	float measure = distance(pt1,pt2);
 	push(length,measure);
 
-f@radius = ((sum(length))/(2*$PI))+0.001;
+	f@radius = ((sum(length))/(2*$PI))+0.001;
 
 -------------------------------------------------------
 
