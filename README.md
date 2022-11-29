@@ -178,18 +178,18 @@ Boooring. But was still cool to give this a crack. Won't work for everything but
 Sometimes, I had issues, needing to select multiple things in code but not being able to do it in a neat way
 Here's a few cool approaches
 
-int last[] = primpoints(0,@primnum)[-2:];
-int last2[] = primpoints(0,@primnum)[:2];
+	int last[] = primpoints(0,@primnum)[-2:];
+	int last2[] = primpoints(0,@primnum)[:2];
 
-if(find(lastpoints,@ptnum))>-1{
-	//do something
-}
+	if(find(lastpoints,@ptnum))>-1{
+		//do something
+	}
 
 I also liked using match() in pointwrangles to get stuff by using wildcards, so example:
 
-if(match("*bla*",prim(0,"path",@primnum)==1)){
-	//do something
-}
+	if(match("*bla*",prim(0,"path",@primnum)==1)){
+		//do something
+	}
 
 If you can get stuff in a conditional statement that is readable, everyone wins
 
@@ -206,35 +206,35 @@ Make sure you plug in your first input to keep track of the changing points posi
 And plug in through another input the changing velocity computed from upstream.
 Also do some vdb magic with your collider to source the sweet sdf goodness.
 
-float offset = chf("offset");
-vector sample = @P + @N * offset;
-float dist = volumesample(1,0,@P);
-vector distgradient = volumegradient(1,0,@P);
+	float offset = chf("offset");
+	vector sample = @P + @N * offset;
+	float dist = volumesample(1,0,@P);
+	vector distgradient = volumegradient(1,0,@P);
 
 
-f@intersect = 1;
-float multiply = chf("multiply");
-@P = (@P + (distgradient * multiply));
-v@velocity = point(3,"v",@ptnum);
-v@speed = point(3,"speed",@ptnum);
+	f@intersect = 1;
+	float multiply = chf("multiply");
+	@P = (@P + (distgradient * multiply));
+	v@velocity = point(3,"v",@ptnum);
+	v@speed = point(3,"speed",@ptnum);
 
-@P = @P + (normalize(v@velocity)) * v@speed/24;
+	@P = @P + (normalize(v@velocity)) * v@speed/24;
 
 What essentially I'm doing, is pushing out the collider to make space for whatever is about to start colliding with. It's a custom deformer that keeps position in line with animated topology.
 It's cool because this way you can actually get some really nasty collisions out of the way in ways that would be really hard to sort out procedurally.
 
 But you know what? I've got a variation of this.
 
-v@P2 = point(1,"P",0);
-float dist = distance(@P,v@P2);
-float ratio = chf("ratio");
-float min = chf("min");
-float max = chf("max");
-float velocity = point(2,"v",@ptnum);
-float speed = point(2,"speed",@ptnum);
+	v@P2 = point(1,"P",0);
+	float dist = distance(@P,v@P2);
+	float ratio = chf("ratio");
+	float min = chf("min");
+	float max = chf("max");
+	float velocity = point(2,"v",@ptnum);
+	float speed = point(2,"speed",@ptnum);
 
-@P = @P + (@P - v@P2) * -ratio * fit(dist,min,max,1,0);
-@P = @P + normalize(velocity) * speed / 24;
+	@P = @P + (@P - v@P2) * -ratio * fit(dist,min,max,1,0);
+	@P = @P + normalize(velocity) * speed / 24;
 
 Almost the same thing, except it takes consideration of the distance from a very specific point that you can set yourself!
 This one was very much work in progress I mad an attempt to get very specific collisions out of the way but heh, doing it based on sdf or a point or whatever helps you achieve your dreams!
@@ -246,36 +246,36 @@ But at the time I decided to be a genius and create my own... hmm, what was it? 
 
 Anyway, two different wrangles one after the other: Prim wrangle first:
 
-int primpoints_count[] = primpoints(0,@primnum);
-i@primpoints_count = len(primpoints_count);
+	int primpoints_count[] = primpoints(0,@primnum);
+	i@primpoints_count = len(primpoints_count);
 
 point wrangle now
 
-int primpoints_count[];
-int sum_of_points[];
-int sum_of = 0;
-float offset;
-int last_points;
-int first_points;
+	int primpoints_count[];
+	int sum_of_points[];
+	int sum_of = 0;
+	float offset;
+	int last_points;
+	int first_points;
 
-for(int i=0; i<@numprim; i++){
-	int sum = prim(0,"primpoints_count",i);
-	push(sum_of_points,sum);
-	push(primpoints_count,sum);
+	for(int i=0; i<@numprim; i++){
+		int sum = prim(0,"primpoints_count",i);
+		push(sum_of_points,sum);
+		push(primpoints_count,sum);
 
-	int sum_of_points_last = sum_of_points[-1:][0];
-	sum_of += sum_of_points_last;
+		int sum_of_points_last = sum_of_points[-1:][0];
+		sum_of += sum_of_points_last;
 
-	addprim(0,"polyline",sum_of-1,sum_of);
-}
+		addprim(0,"polyline",sum_of-1,sum_of);
+	}
 
-//addprim(0,"polyline",0,sum_of-1); //if you want to close it up
-last_points = sum(primpoints_count[:-1]);
-first_points = sum(primpoints_count[1:]);
+	//addprim(0,"polyline",0,sum_of-1); //if you want to close it up
+	last_points = sum(primpoints_count[:-1]);
+	first_points = sum(primpoints_count[1:]);
 
-float offset_ramp = chf("offset_ramp");
-offset = last_points - first_points * offset_ramp;
-i@offset = int(offset);
+	float offset_ramp = chf("offset_ramp");
+	offset = last_points - first_points * offset_ramp;
+	i@offset = int(offset);
 
 Then chuck down a polypath, voila doesn't matter whether you sort your stuff or if the uvw stuff is pointing the wrong way, no reverse nodes no nothing - this will sort you out mate.
 
@@ -293,14 +293,14 @@ This could be particularly useful for a company which doesn't exactly have a pip
 
 Detail Wrangle
 
-d@hashmap = set(
-"shotname_1",1,
-"shotname_2",2);
+	d@hashmap = set(
+	"shotname_1",1,
+	"shotname_2",2);
 
-s@shot_ref = chs("/obj/RefNode/ShotCode");
-string shot_ref = s@shotref;
+	s@shot_ref = chs("/obj/RefNode/ShotCode");
+	string shot_ref = s@shotref;
 
-i@switcheroo = getcomp(d@hashmap,shot_ref,0);
+	i@switcheroo = getcomp(d@hashmap,shot_ref,0);
 
 You gonna ask me what does it do? Well, shiiiii, you change numbers and set defaults based on shot-context. What does it give you? Well, superpowers mate - you can essentially create your own dictionary of how you want the values to change based on shot and reference it!
 
