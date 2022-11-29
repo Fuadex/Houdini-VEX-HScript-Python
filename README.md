@@ -15,7 +15,7 @@ Chuck down a timeshift set to beginning of shot (preroll) and another with actua
 	vector P2 = point(1,"P",@ptnum);
 	int T1 = $RFSTART;
 	int T2 = $RFSTART + 100;
-	float shot_length = fit(@Frame,t1,t2,0,1);
+	float shot_length = fit(@Frame,T1,T2,0,1);
 	float ramp = chramp("Translate",shot_length);
 
 	v@P = P1+(P1-P2)*ramp*-1;
@@ -34,7 +34,7 @@ So....? Say, you want to remap stiffness properly between specific frames, here'
 	i@frame_start = $FSTART;
 	i@frame_end = $FEND;
 	f@stiffness = 1;
-	f@exponent = fit(@Frame,i@frame_start,i@frame_end,-10,5);
+	f@exponent = fit(@Frame,i@frame_start,i@frame_end,-10,10);
 
 	f@remap = 1 * pow(10,@exponent);
 
@@ -239,6 +239,8 @@ Almost the same thing, except it takes consideration of the distance from a very
 This one was very much work in progress I mad an attempt to get very specific collisions out of the way but heh, doing it based on sdf or a point or whatever helps you achieve your dreams!
 
 ------------------------------------------------------
+
+Join node Alternate
 
 A long time ago I had quite a bit of a problem with a specific thing, essentially I couldn't really put together lines into a single polyline. Today I know what was going on and there are a few techniques of addressing this.
 But at the time I decided to be a genius and create my own... hmm, what was it? Jesus, I'm such a genius that I prefer my own tools over legacy houdini, wololo.
