@@ -188,7 +188,7 @@ Here's a few cool approaches
 	int last[] = primpoints(0,@primnum)[-2:];
 	int last2[] = primpoints(0,@primnum)[:2];
 
-	if(find(lastpoints,@ptnum))>-1{
+	if(find(last,@ptnum) || find(last2,@ptnum))>-1{
 		//do something
 	}
 
