@@ -149,8 +149,8 @@ It's simple.
 	//And you do logic.
 	//Such as this.
 
-	float spread = fit(v@P, bounds_ymin, bounds_ymax,0,1);
-	float ramp = chramp("ramp",spread);
+	vector spread = fit(v@P, bounds_ymin, bounds_ymax,0,1);
+	float ramp = chramp("ramp",spread[1]);
 	@Cd.r = ramp; //color red along the y axis of the object's bounding box
 
 It's really cool beans. So handy. And there are intrinsics like that for primitives as well!
@@ -164,15 +164,15 @@ Boooring. But was still cool to give this a crack as I had a task in which I had
 
 	float length[];
 
-	for(int i=0;i<numpt-1;i++){
+	for(int i=0;i<@numpt-1;i++){
 		vector pt1 = point(0,"P",i);
-		vecotr pt2 = point(0,"P",i+1);
+		vector pt2 = point(0,"P",i+1);
 		float measure = distance(pt1,pt2);
 		push(length,measure);
 	}
 
 	vector pt1 = point(0,"P",0);
-	vecotr pt2 = point(0,"P",@numpt-1);
+	vector pt2 = point(0,"P",@numpt-1);
 	float measure = distance(pt1,pt2);
 	push(length,measure);
 
@@ -185,11 +185,11 @@ Find matchmaker
 Sometimes, I had issues, needing to select multiple things in code but not being able to do it in a neat way.
 Here's a few cool approaches
 
-	int last[] = primpoints(0,@primnum)[-2:];
-	int last2[] = primpoints(0,@primnum)[:2];
+	i[]@last = primpoints(0,@primnum)[-2:];
+	i[]@first = primpoints(0,@primnum)[:2];
 
-	if(find(last,@ptnum) || find(last2,@ptnum))>-1{
-		//do something
+	if(find(i@last,@ptnum)==0 || find(i@last,@ptnum)==1){
+	        v@Cd = 0;
 	}
 
 I also liked using match() in pointwrangles to get stuff by using wildcards, so example:
