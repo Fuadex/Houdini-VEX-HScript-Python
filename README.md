@@ -194,7 +194,7 @@ Here's a few cool approaches
 
 I also liked using match() in pointwrangles to get stuff by using wildcards, so example:
 
-	if(match("*bla*",prim(0,"path",@primnum)==1)){
+	if(match("*some_path*",prim(0,"path",@primnum)==1)){
 		//do something
 	}
 
