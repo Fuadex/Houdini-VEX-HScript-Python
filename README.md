@@ -162,21 +162,25 @@ Calculate radius
 
 Boooring. But was still cool to give this a crack as I had a task in which I had to calculate radius of every single wire. Won't work for everything but when you need stuff calculated per object, it could work nicely in a detail wrangle and in a node-based for loop from connectivity. Ideally I'd spice this up to make sure it always worked but you can't always negotiate what sort of geo you'll be getting as a present today.
 
-	float length[];
+	f[]@length;
 
 	for(int i=0;i<@numpt-1;i++){
-		vector pt1 = point(0,"P",i);
-		vector pt2 = point(0,"P",i+1);
-		float measure = distance(pt1,pt2);
-		push(length,measure);
+	        vector pt1 = point(0,"P",i);
+	        vector pt2 = point(0,"P",i+1);
+	        float measure = distance(pt1,pt2);
+	        push(@length,measure);
 	}
 
+	/*
 	vector pt1 = point(0,"P",0);
 	vector pt2 = point(0,"P",@numpt-1);
 	float measure = distance(pt1,pt2);
-	push(length,measure);
+	push(@length,measure);
+	*/
 
-	f@radius = ((sum(length))/(2*$PI))+0.001;
+	f@radius = ((sum(@length))/(2*$PI));
+
+It's important that this code affects only a ring, plenty of ways of extracting just one ring (although always troublesome whenever dealing with an entire series of cables etc.), otherwise you'll kind of end up calculating the length of all edges in your geometry. I mean, you could do that but why not just use a measure sop instead...
 
 -------------------------------------------------------
 
@@ -315,3 +319,6 @@ Yup, that's all you need my brethren. You can feed this directly into possibly a
 	fit(@Frame,$FSTART,$FEND-120,0,1)+fit(@Frame,$FSTART+120,$FEND,0,-1)
 
 Again, straightforward but you can do all sort of cool procedural motion with this and you can look into the channel to see exactly what you're up to! ...or use a tool like wolframalpha to check some crazier mathematical equations. I obviously didn't do this all the time but at some stage when doing CFX, I noticed that ditching keyframes is the way forward (especially if working across many shots!).
+
+-------------------------------------------------------------------
+
