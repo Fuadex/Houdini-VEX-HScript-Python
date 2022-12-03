@@ -304,7 +304,7 @@ You gonna ask me what does it do? Well, shiiiii, you change numbers and set defa
 
 --------------------------------------------------------------
 
-Procedural Attribute Adjustment with Hscript
+Procedural Attribute Adjustment with Hscript (and maths)
 
 Kind of taking the lead from my $FSTART and $FEND idea I'd also introduce some hscript instead of keyframing. Keyframing I always found to be a bit of a pain in the butt, especially in production since you'd end up really refining those keys until the asset is final and it's so finecky. If you want a very specific motion, sure mate but you can also do some cool ramps in vex to procedurally adjust some cool motion. But if you need something quick and dirty in the attrib field? Well.
 
@@ -312,6 +312,6 @@ Kind of taking the lead from my $FSTART and $FEND idea I'd also introduce some h
 
 Yup, that's all you need my brethren. You can feed this directly into possibly any parameter and actually suit it to your needs and introduce some other procedural sauce. Maybe some sin waves or some other cool motion? Be my guest. I'd also do cool stuff like this.
 
-	fit(@Frame,$FSTART,$FEND-120,0,1)++fit(@Frame,$FSTART+120,$FEND,0,-1)
+	fit(@Frame,$FSTART,$FEND-120,0,1)+fit(@Frame,$FSTART+120,$FEND,0,-1)
 
-Again, straightforward but you can do all sort of cool procedural motion with this and you can look into the channel to see exactly what you're up to! ...or use a tool like wolframalpha to check some crazier mathematical equations.
+Again, straightforward but you can do all sort of cool procedural motion with this and you can look into the channel to see exactly what you're up to! ...or use a tool like wolframalpha to check some crazier mathematical equations. I obviously didn't do this all the time but at some stage when doing CFX, I noticed that ditching keyframes is the way forward (especially if working across many shots!).
