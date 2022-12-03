@@ -263,9 +263,6 @@ point wrangle now
 	int primpoints_count[];
 	int sum_of_points[];
 	int sum_of = 0;
-	float offset;
-	int last_points;
-	int first_points;
 
 	for(int i=0; i<@numprim; i++){
 		int sum = prim(0,"primpoints_count",i);
@@ -277,14 +274,6 @@ point wrangle now
 
 		addprim(0,"polyline",sum_of-1,sum_of);
 	}
-
-	//addprim(0,"polyline",0,sum_of-1); //if you want to close it up
-	last_points = sum(primpoints_count[:-1]);
-	first_points = sum(primpoints_count[1:]);
-
-	float offset_ramp = chf("offset_ramp");
-	offset = last_points - first_points * offset_ramp;
-	i@offset = int(offset);
 
 Then chuck down a polypath, voila doesn't matter whether you sort your stuff or if the uvw stuff is pointing the wrong way, no reverse nodes no nothing - this will sort you out mate.
 
