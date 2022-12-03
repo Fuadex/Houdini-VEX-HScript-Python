@@ -171,7 +171,7 @@ Boooring. But was still cool to give this a crack as I had a task in which I had
 	        push(@length,measure);
 	}
 
-	f@radius = ((sum(@length))/(2*$PI));
+	f@radius = (sum(@length))/(2*$PI);
 
 It's important that this code affects only a ring, plenty of ways of extracting just one ring (although always troublesome whenever dealing with an entire series of cables etc.), otherwise you'll kind of end up calculating the length of all edges in your geometry. I mean, you could do that but why not just use a measure sop instead...
 
