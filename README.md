@@ -171,13 +171,6 @@ Boooring. But was still cool to give this a crack as I had a task in which I had
 	        push(@length,measure);
 	}
 
-	/*
-	vector pt1 = point(0,"P",0);
-	vector pt2 = point(0,"P",@numpt-1);
-	float measure = distance(pt1,pt2);
-	push(@length,measure);
-	*/
-
 	f@radius = ((sum(@length))/(2*$PI));
 
 It's important that this code affects only a ring, plenty of ways of extracting just one ring (although always troublesome whenever dealing with an entire series of cables etc.), otherwise you'll kind of end up calculating the length of all edges in your geometry. I mean, you could do that but why not just use a measure sop instead...
