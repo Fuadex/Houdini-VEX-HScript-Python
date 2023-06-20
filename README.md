@@ -315,3 +315,18 @@ Again, straightforward but you can do all sort of cool procedural motion with th
 
 -------------------------------------------------------------------
 
+Culling
+
+Big part of your job at the end of day is, well, pushing stuff through efficiently. There's a million ways to achieve the final effect, probably the ones that take less time and make your worflow optimized will trump everything else, while keeping the flexibility and looks right obviously. Sometimes to reach the right feel, you need the numbers and the numbers need to be pushed radically upwards but there's only so much that can be stuffed in your RAM, especially during simulation. So what should you do? Cull the hell out of it!
+
+There's a few techniques I've seen before, Mr. Knipping suggested in regards to point-based stuff to apply a uv texture and blast this way. I experimented a bit with a volume frustum, which I think I should explore at a few angles just in case (although it's given me plenty of headaches) but at the end of day, culling by toNDC is best.
+
+	string camera = chsop("camera");
+	vector campos = toNDC(camera,@P-chv("offset"));
+
+	if(camera.x > 1.05 || camera.x < -0.05 || camera.y > 1.05 || camera.y < -0.05){
+		@group_blah = 1;
+	}
+
+Then blast it. Don't use it in a solver as a pop/geo wrangle, as it does some nasty things, so -> sopsolver, gas intermittent to execute it once every frame and voila, should be good.
+Interestingly, you can do something very similar without much overhead from what I noticed for volumes, even in a pyrosolver when chucked into a gaswrangle, it's weird but hey, I've done some very beautiful culling this way. Also, steal a vdbcombine from one of the vdb sops that optimizes vel. If you don't wanna, you can use a vdbcombine, plug same dop geo into both inputs, groupA: vel, groupB: density, make an activity intersection and you know what? Your pyro vel will go as far as density goes until it's blasted. In theory, it might cause some issues but I haven't seen any in my use cases and likely in most cases you won't either but this will keep your sims nicer, cuter, smaller etc. etc.
