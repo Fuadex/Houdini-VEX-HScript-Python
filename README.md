@@ -330,3 +330,38 @@ There's a few techniques I've seen before, Mr. Knipping suggested in regards to 
 
 Then blast it. Don't use it in a solver as a pop/geo wrangle, as it does some nasty things, so -> sopsolver, gas intermittent to execute it once every frame and voila, should be good.
 Interestingly, you can do something very similar without much overhead from what I noticed for volumes, even in a pyrosolver when chucked into a gaswrangle, it's weird but hey, I've done some very beautiful culling this way. Also, steal a vdbcombine from one of the vdb sops that optimizes vel. If you don't wanna, you can use a vdbcombine, plug same dop geo into both inputs, groupA: vel, groupB: density, make an activity intersection and you know what? Your pyro vel will go as far as density goes until it's blasted. In theory, it might cause some issues but I haven't seen any in my use cases and likely in most cases you won't either but this will keep your sims nicer, cuter, smaller etc. etc.
+
+-------------------------------------------------------------------
+
+Calculate bounding box from packed objects
+
+This is a bit of a smaller thing but I didn't know volumes of packed objects don't get calculated by default and in certain circumstances, this can come in quite rather handy actually. I couldn't get measure sop to work and other sop-based methods failed weirdly, so... instead!
+Do a primwrangle and:
+
+	float bounds[] = priminstrinsic(0,"bounds",0);
+	f@vol = abs(bounds[0]-bounds[1])*abs(bounds[2]-bounds[3])*abs(bounds[4]-bounds[5]);
+
+This will calculate a rough volume of your packed objects. Is this ideal? No, as it only approximates your thing and if you'd like precise measures, I guess a measure sop on unpacked objects will be your friend here BUT!
+When you're working with say, thousands, tens of thousands, millions of packed geometry, you might want to have a quick and dirty way of purging smaller stuff, so you can create logic ya know.
+For instance, anything smaller than, say, 1 quadratic meter, please leave my scene etc. Anything larger far away, that too and afterwards the rest? Please make it an sdf hehe.
+
+-------------------------------------------------------------------
+
+Wrangle remap to min/max values
+
+Ever had a problem, you have some values but don't have min/max values so, making logic is being difficult? I know you can use a node to calculate min/max values once but you might want to do it dynamically instead.
+Detail wrangle here I come:
+
+	float value[];
+
+	for(int i=0; i<@numpt-1; i++){
+		float pt_value = point(0,"some_value",i);
+		float val = pt_value;
+		append(value,val);
+	}
+
+	f@value_min = min(value);
+	f@value_max = max(value); //if you want to do stuff to it, give it a clamp to 0,1 hehe
+	//f[]@value = value; //if you want this exposed, which you might want
+
+Now you can do any sort of magic you'd like based on the min/max values, pronto
