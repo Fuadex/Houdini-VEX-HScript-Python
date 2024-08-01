@@ -365,3 +365,44 @@ Detail wrangle here I come:
 	//f[]@value = value; //if you want this exposed, which you might want
 
 Now you can do any sort of magic you'd like based on the min/max values, pronto
+
+-------------------------------------------------------------------
+
+Heightfield wrangle (mix masks/height conditionals)
+
+This one's pretty straightforward but I found myself needing to use heightfields to do some work. Heightfields are amazing when used as colliders, Houdini does not quite use them as part of their usual solver coolness and rather prefers to rely on VDB-based plug-ins or surface collisions. First pretty handy, second bit less ideal for performance reasons as I found from RnD on Furiosa. My sup recommended giving a whirl with heightfields, which requires hacking the solver and feeding in terrain object and hey, it's pretty sweet.
+
+Anyway, as you use heightfields, you kind of need to stick to them and the amount of nodes available can be a bit limiting, even when messing around with masks. The simple idea is to use a wrangle to do just what you want but these are heightfields, so how exactly do I...? Well, it's rather simple after all but not so obvious if you think about it. Here's a sampling thing and some basic filtering example.
+
+	@mask -= volumesample(1,"mask",@P);
+	if(@mask<0.001){
+	@mask += volumesample(2,"mask",@P);
+	}
+	if(@height<50 || @height>25){
+	@mask = 0;
+	}
+
+-------------------------------------------------------------------
+
+Volume operations based on a variable
+
+This one also not so obvious. Doing bespoke operations on volumes is slightly tricky, as they don't seem to be as easily viewable, in terms of what operations you're really feeding them. Usually I'd just turn them into points and then see what a pointwrangle does and check geo spreadsheet to know what's going on. I had a task, in which a volumes in the shot had to be culled by a falloff and also in certain areas, rather easy task to be fair but how does one do this? Well, it's like in a pointwrangle really, stuff seems to work on volumes too which is cool.
+
+I did this thing a few times now and I dislike re-inventing the wheel, I always get my mind blown by the distance from nearest point, kinda looks ok but once you start looking at it, weird distances appear and I know why - because I'm not pointing to the right near points from the right context! It happens folks.
+
+	float dist = distance(@P,point(1,"P",0));
+	float dist_remap = fit(dist,1000,0,1,0);
+	float ramped = chramp("remap_this",dist_remap);
+	
+	@density *= ramped;
+	
+	int near = nearpoint(2,@P,1000);
+	float dist2 = distance(@P,point(2,"P",near));
+	float dist_remap_2 = fit(dist2,1000,0,1,0);
+	float ramped2 = chramp("remap_ya",dist_remap_2);
+	
+	@density = @ramped2;
+
+-------------------------------------------------------------------
+
+Heyyy, what you want more? Be patient mate, more will arrive in due time as I figure stuff out ^^
