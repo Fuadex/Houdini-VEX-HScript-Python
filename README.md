@@ -405,4 +405,20 @@ I did this thing a few times now and I dislike re-inventing the wheel, I always 
 
 -------------------------------------------------------------------
 
+Playing back .exrs with MPV
+
+Here's a little trick. Since I switched to Windows 11 on my laptop, I lost my ability to view .exrs with irfanview - which wasn't an ideal solution. I could use Nuke, Adobe Premiere (cumbersome), maybe Xstudio, there are some alternatives out there or even new Houdini Cops. But, there is one more solution that I've found pretty neat and that's using MPV, which I use to playback any videos, it's customization options are just incredible. And you can you use it to playback things from a command line.
+
+So, in cmd point to where you MPV lives like
+
+	cd Desktop/mpv
+
+ And then you can do some cool magic like, playback an .exr sequence.
+
+ 	mpv "mf://C:\Users\VeryCoolUser\Desktop\Project\render\AmazingRender.%04d.exr" --demuxer-lavf-format=image2
+
+It's not magical, the %04d is the frame number in xxxx format.
+I'm sure anyone after computer science with foo through issues like this in no-time.
+But I find it pretty handy to just playback anything I'd like from a command line - and there's heaps of options on their website. Check it out!
+
 Heyyy, what you want more? Be patient mate, more will arrive in due time as I figure stuff out ^^
