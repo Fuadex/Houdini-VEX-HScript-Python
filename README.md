@@ -405,6 +405,33 @@ I did this thing a few times now and I dislike re-inventing the wheel, I always 
 
 -------------------------------------------------------------------
 
+Aggregate strings, find them afterwards
+
+Ever had some gnarly and complicated scene with tons of stuff flying everywhere and the need to clean this up, perhaps bit more procedurally? Cause like, ain't nobody keen to doing 3D roto, right? Well, drop down a detail wrangle and with a timeshift at, probably the end of the scene, drop down this:
+
+	s[]@names;
+	
+	for(int i=0;i<@numpt-1;i++){
+	if(point(0,"mask",i)>0.7){
+	s@nam = point(0,"name",i);
+	append(@names,@nam);
+	}
+	}
+
+You'll pack all the existing names into a detail attribute. What can you do afterwards with this? Well, something like this:
+
+	s[]@names = detail(1,"names");
+	
+	if(find(@names,@name)<0){
+	}
+	else{
+	removepoint(0,@ptnum,1);
+	}
+
+What will this do? Oh, it will just try and find whether the name exists or not and if it doesn't, boom. It can be really helpful if you need a consistent point count or RBD objects with consistent naming convention, at the very least to make sure moblur doesn't go crazy or stuff doesn't appear out of nowhere. Weird things can happen and a wrangle like this can prevent this from happening.
+
+-------------------------------------------------------------------
+
 Playing back .exrs with MPV
 
 Here's a little trick. Since I switched to Windows 11 on my laptop, I lost my ability to view .exrs with irfanview - which wasn't an ideal solution. I could use Nuke, Adobe Premiere (cumbersome), maybe Xstudio, there are some alternatives out there or even new Houdini Cops. But, there is one more solution that I've found pretty neat and that's using MPV, which I use to playback any videos, it's customization options are just incredible. And you can you use it to playback things from a command line.
