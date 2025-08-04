@@ -412,10 +412,8 @@ Ever had some gnarly and complicated scene with tons of stuff flying everywhere 
 	s[]@names;
 	
 	for(int i=0;i<@numpt-1;i++){
-	if(point(0,"mask",i)>0.7){
-	s@nam = point(0,"name",i);
-	append(@names,@nam);
-	}
+	string nam = point(0,"name",i);
+	append(@names,nam);
 	}
 
 You'll pack all the existing names into a detail attribute. What can you do afterwards with this? Well, something like this:
