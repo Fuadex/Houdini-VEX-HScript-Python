@@ -459,6 +459,6 @@ Audio to spectrum conversion
 
 Using ffmpeg, you can convert your music into something that you can read in houdini without using chops. This will give a 24fps output, which uses some extra post-processing to make sure the images align with the music. Do this with ffmpeg, make sure you have folders created in the ffmpeg bin directory.
 
-	ffmpeg -i "C:\Users\Fuade\Music\getting_smaller.mp3" -filter_complex "[0:a]channelsplit=channel_layout=stereo[L][R];[L]showspectrum=s=1x1024:scale=lin:start=0:stop=20000:slide=replace:color=intensity,format=gray16be,fps=24[left];[R]showspectrum=s=1x1024:scale=lin:start=0:stop=20000:slide=replace:color=intensity,format=gray16be,fps=24[right]" -map "[left]"  -fps_mode passthrough left\frame_%06d.png -map "[right]" -fps_mode passthrough right\frame_%06d.png
+	ffmpeg -i "C:\Users\YoPath\Music\YoSong.mp3" -filter_complex "[0:a]channelsplit=channel_layout=stereo[L][R];[L]showspectrum=s=1x1024:scale=lin:start=0:stop=20000:slide=replace:color=intensity,format=gray16be,fps=24[left];[R]showspectrum=s=1x1024:scale=lin:start=0:stop=20000:slide=replace:color=intensity,format=gray16be,fps=24[right]" -map "[left]"  -fps_mode passthrough left\frame_%06d.png -map "[right]" -fps_mode passthrough right\frame_%06d.png
 
 The result will be 1x1024 greyscale images that you can read back in houdini in lines
