@@ -428,6 +428,11 @@ You'll pack all the existing names into a detail attribute. What can you do afte
 
 What will this do? Oh, it will just try and find whether the name exists or not and if it doesn't, boom. It can be really helpful if you need a consistent point count or RBD objects with consistent naming convention, at the very least to make sure moblur doesn't go crazy or stuff doesn't appear out of nowhere. Weird things can happen and a wrangle like this can prevent this from happening.
 
+
+-------------------------------------------------------------------
+
+Misc
+
 -------------------------------------------------------------------
 
 Playing back .exrs with MPV
@@ -447,3 +452,13 @@ I'm sure anyone after computer science with foo through issues like this in no-t
 But I find it pretty handy to just playback anything I'd like from a command line - and there's heaps of options on their website. Check it out!
 
 Heyyy, what you want more? Be patient mate, more will arrive in due time as I figure stuff out ^^
+
+-----------------------------------------------------------------------
+
+Audio to spectrum conversion
+
+Using ffmpeg, you can convert your music into something that you can read in houdini without using chops. This will give a 24fps output, which uses some extra post-processing to make sure the images align with the music. Do this with ffmpeg, make sure you have folders created in the ffmpeg bin directory.
+
+	ffmpeg -i "C:\Users\Fuade\Music\getting_smaller.mp3" -filter_complex "[0:a]channelsplit=channel_layout=stereo[L][R];[L]showspectrum=s=1x1024:scale=lin:start=0:stop=20000:slide=replace:color=intensity,format=gray16be,fps=24[left];[R]showspectrum=s=1x1024:scale=lin:start=0:stop=20000:slide=replace:color=intensity,format=gray16be,fps=24[right]" -map "[left]"  -fps_mode passthrough left\frame_%06d.png -map "[right]" -fps_mode passthrough right\frame_%06d.png
+
+The result will be 1x1024 greyscale images that you can read back in houdini in lines
