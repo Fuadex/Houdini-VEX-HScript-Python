@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Houdini VEX / HScript — Production Snippets</title>
+  <meta name="description" content="A curated collection of production-tested Houdini VEX, HScript, and VFX workflow snippets for CharFX, simulation, geometry, and optimization." />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+  <style>
+    /* ── Reset / Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #0d1117;
+      --surface:      #161b22;
+      --card:         #1c2128;
+      --border:       #30363d;
+      --border-hover: #3d444d;
+      --accent:       #e8610a;
+      --accent-light: #ff8a3c;
+      --text:         #e6edf3;
+      --text-muted:   #8b949e;
+      --text-subtle:  #6e7681;
+      --sidebar-w:    232px;
+      --header-h:     60px;
+      --radius:       8px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      font-size: 15px;
+    }
+
+    /* ── Header ── */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: var(--header-h);
+      background: rgba(13, 17, 23, 0.9);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 12px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 7px;
+      background: linear-gradient(135deg, var(--accent), #c14300);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 900;
+      color: #fff;
+      flex-shrink: 0;
+      letter-spacing: -1px;
+    }
+
+    .logo-text strong {
+      display: block;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .logo-text span {
+      display: block;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .header-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gh-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      transition: border-color .15s, color .15s;
+    }
+
+    .gh-btn:hover { border-color: var(--accent); color: var(--text); }
+
+    /* ── Layout ── */
+    .layout {
+      display: flex;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      position: sticky;
+      top: var(--header-h);
+      height: calc(100vh - var(--header-h));
+      overflow-y: auto;
+      padding: 16px 0 32px;
+      border-right: 1px solid var(--border);
+    }
+
+    .sidebar::-webkit-scrollbar { width: 3px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .nav-group { margin-bottom: 4px; }
+
+    .nav-group-label {
+      padding: 8px 16px 4px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-subtle);
+    }
+
+    .nav-link {
+      display: block;
+      padding: 5px 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: color .15s, background .15s, border-color .15s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav-link:hover { color: var(--text); background: rgba(255,255,255,.04); }
+
+    .nav-link.active {
+      color: var(--accent-light);
+      border-left-color: var(--accent);
+      background: rgba(232, 97, 10, .08);
+    }
+
+    /* ── Main content ── */
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 36px 40px 80px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      margin-bottom: 40px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero h1 {
+      font-size: 30px;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 10px;
+      background: linear-gradient(130deg, var(--text) 30%, var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 15px;
+      max-width: 600px;
+    }
+
+    .stats {
+      display: flex;
+      gap: 28px;
+      margin-top: 20px;
+    }
+
+    .stat-value { font-size: 20px; font-weight: 700; color: var(--accent-light); }
+    .stat-label { font-size: 11px; color: var(--text-subtle); margin-top: 1px; }
+
+    /* ── Section cards ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 26px 28px;
+      margin-bottom: 20px;
+      scroll-margin-top: calc(var(--header-h) + 16px);
+      transition: border-color .15s;
+    }
+
+    .card:hover { border-color: var(--border-hover); }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      flex: 1;
+    }
+
+    /* ── Tags ── */
+    .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 14px; }
+
+    .tag {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    .tag-vex     { background: rgba(232,97,10,.15);  border: 1px solid rgba(232,97,10,.4);  color: var(--accent-light); }
+    .tag-hscript { background: rgba(56,139,253,.15); border: 1px solid rgba(56,139,253,.4); color: #79b8ff; }
+    .tag-tools   { background: rgba(63,185,80,.15);  border: 1px solid rgba(63,185,80,.4);  color: #56d364; }
+    .tag-charfx  { background: rgba(188,99,255,.15); border: 1px solid rgba(188,99,255,.4); color: #d2a8ff; }
+    .tag-sim     { background: rgba(56,184,220,.15); border: 1px solid rgba(56,184,220,.4); color: #56d4e0; }
+    .tag-geo     { background: rgba(253,187,56,.15); border: 1px solid rgba(253,187,56,.4); color: #fbb040; }
+
+    /* ── Description text ── */
+    .desc {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+
+    .desc code {
+      font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+      font-size: 12px;
+      background: rgba(255,255,255,.07);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: var(--text);
+    }
+
+    .desc sup { font-size: 10px; vertical-align: super; }
+
+    .divider { height: 1px; background: var(--border); margin: 18px 0; }
+
+    /* ── Code blocks ── */
+    .code-block { position: relative; margin: 12px 0; }
+
+    .code-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-subtle);
+      margin-bottom: 5px;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 9px;
+      right: 9px;
+      padding: 3px 9px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+      z-index: 5;
+    }
+
+    .copy-btn:hover { border-color: var(--accent); color: var(--text); }
+    .copy-btn.copied { border-color: #56d364; color: #56d364; }
+
+    pre {
+      margin: 0;
+      border-radius: var(--radius);
+      overflow: auto;
+    }
+
+    pre code.hljs {
+      font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      padding: 18px 22px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    /* ── Notes ── */
+    .note {
+      margin-top: 12px;
+      padding: 11px 14px;
+      background: rgba(232,97,10,.06);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    .note strong { color: var(--accent-light); font-weight: 600; }
+
+    .note code {
+      font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+      font-size: 11px;
+      background: rgba(255,255,255,.07);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: var(--text);
+    }
+
+    .note a { color: var(--accent-light); }
+
+    /* ── Footer ── */
+    .site-footer {
+      text-align: center;
+      padding: 28px;
+      border-top: 1px solid var(--border);
+      color: var(--text-subtle);
+      font-size: 13px;
+    }
+
+    .site-footer a { color: var(--text-muted); text-decoration: none; }
+    .site-footer a:hover { color: var(--accent-light); }
+
+    /* ── Back to top ── */
+    .back-to-top {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s, border-color .15s;
+      z-index: 50;
+    }
+
+    .back-to-top.visible { opacity: 1; pointer-events: auto; }
+    .back-to-top:hover { border-color: var(--accent); color: var(--text); }
+
+    /* ── Responsive ── */
+    @media (max-width: 860px) {
+      .sidebar { display: none; }
+      .main { padding: 24px 20px 60px; }
+    }
+
+    @media (max-width: 580px) {
+      .hero h1 { font-size: 22px; }
+      .logo-text span { display: none; }
+      .stats { gap: 18px; }
+      .card { padding: 18px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─────────── Header ─────────── -->
+<header class="site-header">
+  <a href="#" class="logo">
+    <div class="logo-icon">H</div>
+    <div class="logo-text">
+      <strong>Houdini VEX / HScript</strong>
+      <span>Production Snippets</span>
+    </div>
+  </a>
+  <div class="header-right">
+    <a href="https://github.com/Fuadex/Houdini-VEX-HScript-Python" class="gh-btn" target="_blank" rel="noopener">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+      </svg>
+      GitHub
+    </a>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- ─────────── Sidebar ─────────── -->
+  <nav class="sidebar" id="sidebar">
+
+    <div class="nav-group">
+      <div class="nav-group-label">CharFX / Cloth</div>
+      <a href="#charfx-preroll"      class="nav-link">Preroll Fix</a>
+      <a href="#vellum-ramping"      class="nav-link">Vellum Stiffness Ramp</a>
+      <a href="#vector-deformation"  class="nav-link">Vector Deformation</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Deformation</div>
+      <a href="#wrangle-blendshape"  class="nav-link">Wrangle Blendshape</a>
+      <a href="#custom-deformer"     class="nav-link">Custom Deformer</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Geometry</div>
+      <a href="#calculate-radius"    class="nav-link">Calculate Radius</a>
+      <a href="#packed-bbox"         class="nav-link">Packed Object BBox</a>
+      <a href="#join-node"           class="nav-link">Join Node Alternate</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Utility / Math</div>
+      <a href="#vector-push"         class="nav-link">Vector Push &amp; Direction</a>
+      <a href="#relation-ops"        class="nav-link">Relation Operations</a>
+      <a href="#find-matchmaker"     class="nav-link">Find Matchmaker</a>
+      <a href="#remap-minmax"        class="nav-link">Remap Min/Max</a>
+      <a href="#aggregate-strings"   class="nav-link">Aggregate Strings</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Data Structures</div>
+      <a href="#hashmaps"            class="nav-link">Hashmaps / Dicts</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Simulation / FX</div>
+      <a href="#culling"             class="nav-link">Culling with toNDC</a>
+      <a href="#heightfield"         class="nav-link">Heightfield Wrangle</a>
+      <a href="#volume-ops"          class="nav-link">Volume Operations</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">HScript</div>
+      <a href="#hscript-attrs"       class="nav-link">Procedural Attributes</a>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-group-label">Tools / Misc</div>
+      <a href="#mpv-exr"             class="nav-link">MPV for EXR Playback</a>
+      <a href="#audio-spectrum"      class="nav-link">Audio to Spectrum</a>
+    </div>
+
+  </nav>
+
+  <!-- ─────────── Main ─────────── -->
+  <main class="main">
+
+    <!-- Hero -->
+    <div class="hero">
+      <h1>Houdini VEX / HScript</h1>
+      <p>A personal collection of production-tested snippets for CharFX, simulation, geometry, and VFX optimization — grown from real shots.</p>
+      <div class="stats">
+        <div>
+          <div class="stat-value">20</div>
+          <div class="stat-label">Snippets</div>
+        </div>
+        <div>
+          <div class="stat-value">VEX</div>
+          <div class="stat-label">Primary Language</div>
+        </div>
+        <div>
+          <div class="stat-value">CFX</div>
+          <div class="stat-label">Focus Area</div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ── CharFX Preroll Fix ── -->
+    <div class="card" id="charfx-preroll">
+      <div class="card-header">
+        <h2 class="card-title">CharFX Preroll Fix</h2>
+      </div>
+      <div class="tags">
+        <span class="tag tag-vex">VEX</span>
+        <span class="tag tag-charfx">CharFX</span>
+        <span class="tag tag-sim">Simulation</span>
+      </div>
+      <p class="desc">
+        When cloth preroll doesn't settle cleanly by shot start, this wrangle blends the two poses — no animator re-publish needed. TimeShift to the preroll frame on input 0, shot start on input 1, then plug both into this Point Wrangle.
+      </p>
+      <div class="code-block">
+        <div class="code-label">Point Wrangle — preroll blend</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">vector P1 = point(0, "P", @ptnum);
+vector P2 = point(1, "P", @ptnum);
+int T1 = $RFSTART;
+int T2 = $RFSTART + 100;
+float shot_length = fit(@Frame, T1, T2, 0, 1);
+float ramp = chramp("Translate", shot_length);
+
+v@P = P1 + (P1 - P2) * ramp * -1;</code></pre>
+      </div>
+      <div class="note">Set the ramp to a B-Spline smooth transition. Bonus: this avoids loading the full heavy anim geo frame-by-frame during preroll — two birds, one stone.</div>
+    </div>
+
+
+    <!-- ── Vellum Stiffness Ramping ── -->
+    <div class="card" id="vellum-ramping">
+      <div class="card-header">
+        <h2 class="card-title">Vellum Stiffness Ramping</h2>
+      </div>
+      <div class="tags">
+        <span class="tag tag-vex">VEX</span>
+        <span class="tag tag-sim">Simulation</span>
+      </div>
+      <p class="desc">
+        Vellum stiffness operates on exponential values (10<sup>n</sup>), so remapping it linearly produces nothing useful. Remap the <em>exponent</em> instead. Source this outside DOPs for sanity.
+      </p>
+      <div class="code-block">
+        <div class="code-label">Point/Detail Wrangle — stiffness ramp via exponent</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">i@frame_start = $FSTART;
+i@frame_end   = $FEND;
+f@stiffness   = 1;
+f@exponent    = fit(@Frame, i@frame_start, i@frame_end, -10, 10);
+
+f@remap = 1 * pow(10, @exponent);</code></pre>
+      </div>
+      <div class="note"><strong>Key insight:</strong> remap the exponent, not the stiffness directly. This gives a smooth, perceptually correct increase/decrease across any frame range.</div>
+    </div>
+
+
+    <!-- ── Vector Deformation & Bend ── -->
+    <div class="card" id="vector-deformation">
+      <div class="card-header">
+        <h2 class="card-title">CharFX Vector Deformation &amp; Bend</h2>
+      </div>
+      <div class="tags">
+        <span class="tag tag-vex">VEX</span>
+        <span class="tag tag-charfx">CharFX</span>
+      </div>
+      <p class="desc">
+        When a shot starts with a collider already intersecting cloth and peaking outward isn't viable (complex extrusions, self-overlapping topology), split the region of interest, extract its centroid, and use this metaball-like push to separate the geo procedurally.
+      </p>
+      <div class="code-block">
+        <div class="code-label">Point Wrangle — metaball push from centroid</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">// vector P1 = point(0, "P", 0);  // optional second centroid
+vector P2   = point(1, "P", 0);
+float min   = chf("minimum");
+float max   = chf("maximum");
+float ratio = chf("ratio");
+
+float dist  = distance(v@P, P2);
+float remap = fit(dist, min, max, 1, 0);
+// float bend = chramp("bend", remap);  // use bend for custom falloff
+
+v@P = v@P + (v@P - P2) * -(ratio) * remap;</code></pre>
+      </div>
+      <div class="note">Swap <code>remap</code> for <code>chramp("bend", remap)</code> to get a custom bend curve — effectively a hand-rolled Bend node that sidesteps the mysterious stretching Houdini's built-in sometimes produces.</div>
+    </div>
+
+
+    <!-- ── Wrangle Blendshape ── -->
+    <div class="card" id="wrangle-blendshape">
+      <div class="card-header">
+        <h2 class="card-title">Wrangle Blendshape</h2>
+      </div>
+      <div class="tags">
+        <span class="tag tag-vex">VEX</span>
+      </div>
+      <p class="desc">
+        A minimal VEX blendshape with mask-driven blending. Point count must match between inputs. The float attribute acts as the blend weight, giving full per-point control.
+      </p>
+      <div class="code-block">
+        <div class="code-label">Point Wrangle — masked blendshape</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">vector P1 = point(1, "P", @ptnum);
+vector P2 = point(0, "P", @ptnum);
+vector deltaP = P2 - P1;
+
+float offset = ch("offset");
+float foo     = clamp((f@float_variable + offset), -1, 1);
+float scale   = chramp("ramppos", foo);
+
+v@P = P1 + (scale * deltaP);</code></pre>
+      </div>
+      <div class="note">Drive <code>float_variable</code> from any attribute — painted weights, distance falloffs, or sim outputs — for maximum flexibility.</div>
+    </div>
+
+
+    <!-- ── Vector Push & Direction Estimation ── -->
+    <div class="card" id="vector-push">
+      <div class="card-header">
+        <h2 class="card-title">Vector Push &amp; Direction Estimation</h2>
+      </div>
+      <div class="tags">
+        <span class="tag tag-vex">VEX</span>
+      </div>
+      <p class="desc">
+        A simple point push, an averaged-normal technique for primitives, and a tangent-averaging trick to estimate the overall direction of a curve — useful for variably switching point and UV counts on curves.
+      </p>
+      <div class="code-block">
+        <div class="code-label">Point Wrangle — push along vector</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">vector dir1 = set(0, 0, 0);
+vector dir2 = set(1, 1, 1);
+v@P += dir2 * chf("magnitude");</code></pre>
+      </div>
+      <div class="code-block">
+        <div class="code-label">Detail Wrangle — average primitive normals</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">vector dir;
+
+for (int i = 0; i &lt; nprimitives(0); i++) {
+    dir += prim(0, "N", i);
+    dir  = normalize(dir);
+}</code></pre>
+      </div>
+      <div class="code-block">
+        <div class="code-label">Detail Wrangle — curve direction from tangents (Resample upstream first)</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">v[]@tangentu_list;
+v@vector_sum;
+
+for (int i = 0; i &lt; @numpt; i++) {
+    vector tangentu_pt = point(0, "tangentu", i);
+    append(@tangentu_list, tangentu_pt);
+}
+
+@vector_sum = sum(@tangentu_list) / len(@tangentu_list);</code></pre>
+      </div>
+      <div class="note">Works reliably even for curves that change direction multiple times — the averaged tangent gives the dominant travel direction.</div>
+    </div>
+
+
+    <!-- ── In Relation Operations ── -->
+    <div class="card" id="relation-ops">
+      <div class="card-header">
+        <h2 class="card-title">In Relation Operations (Intrinsics)</h2>
+      </div>
+      <div class="tags">
+        <span class="tag tag-vex">VEX</span>
+      </div>
+      <p class="desc">
+        <code>relpointbbox</code> works, but intrinsics give cleaner, more predictable access to exact bounding box bounds — no node-level bbox weirdness. Great for height-based attribute distribution.
+      </p>
+      <div class="code-block">
+        <div class="code-label">Point Wrangle — height ramp via bounding box intrinsics</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">float bounds[]    = detailintrinsic(0, "bounds");
+float bounds_ymin = bounds[2];
+float bounds_ymax = bounds[3];
+
+vector spread = fit(v@P, bounds_ymin, bounds_ymax, 0, 1);
+float ramp    = chramp("ramp", spread[1]);
+@Cd.r         = ramp;   // red channel driven by Y height</code></pre>
+      </div>
+      <div class="note"><code>detailintrinsic(0, "bounds")</code> returns <code>[xmin, xmax, ymin, ymax, zmin, zmax]</code>. Primitive intrinsics follow the same pattern — check the VEX docs for the full list.</div>
+    </div>
+
+
+    <!-- ── Calculate Radius ── -->
+    <div class="card" id="calculate-radius">
+      <div class="card-header">
+        <h2 class="card-title">Calculate Radius</h2>
+      </div>
+      <div class="tags">
+        <span class="tag tag-vex">VEX</span>
+        <span class="tag tag-geo">Geometry</span>
+      </div>
+      <p class="desc">
+        Calculates the radius of a single wire/ring by summing edge lengths and dividing by 2π. Best used inside a node-based for-each loop with Connectivity upstream so each piece is processed independently.
+      </p>
+      <div class="code-block">
+        <div class="code-label">Detail Wrangle — radius from edge lengths</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">f[]@length;
+
+for (int i = 0; i &lt; @numpt - 1; i++) {
+    vector pt1    = point(0, "P", i);
+    vector pt2    = point(0, "P", i + 1);
+    float measure = distance(pt1, pt2);
+    push(@length, measure);
+}
+
+f@radius = (sum(@length)) / (2 * $PI);</code></pre>
+      </div>
+      <div class="note">Only gives meaningful results when the input is a single ring. Use Connectivity + a for-each loop to isolate individual rings before running this code.</div>
+    </div>
+
+
+    <!-- ── Find Matchmaker ── -->
+    <div class="card" id="find-matchmaker">
+      <div class="card-header">
+        <h2 class="card-title">Find Matchmaker</h2>
+      </div>
+      <div class="tags">
+        <span class="tag tag-vex">VEX</span>
+      </div>
+      <p class="desc">
+        Two handy selection patterns: slice-based point selection from prim endpoints, and wildcard path matching — useful when node-based group expressions aren't flexible enough.
+      </p>
+      <div class="code-block">
+        <div class="code-label">Prim Wrangle — select last/first two points per prim</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">i[]@last  = primpoints(0, @primnum)[-2:];
+i[]@first = primpoints(0, @primnum)[:2];
+
+if (find(i@last, @ptnum) == 0 || find(i@last, @ptnum) == 1) {
+    v@Cd = 0;
+}</code></pre>
+      </div>
+      <div class="code-block">
+        <div class="code-label">Point Wrangle — wildcard path matching</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">if (match("*some_path*", prim(0, "path", @primnum)) == 1) {
+    // do something
+}</code></pre>
+      </div>
+    </div>
+
+
+    <!-- ── Custom Deformer ── -->
+    <div class="card" id="custom-deformer">
+      <div class="card-header">
+        <h2 class="card-title">Custom Deformer (Solver-Based)</h2>
+      </div>
+      <div class="tags">
+        <span class="tag tag-vex">VEX</span>
+        <span class="tag tag-charfx">CharFX</span>
+        <span class="tag tag-sim">Simulation</span>
+      </div>
+      <p class="desc">
+        When a shot starts mid-collision and preroll isn't an option, this solver wrangle pushes geometry out of a collider SDF to clear space before simulation begins. A Switch upstream feeds first-frame geometry on frame 1, previous frame otherwise.
+      </p>
+      <div class="code-block">
+        <div class="code-label">Solver Wrangle — SDF-based push</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">float offset        = chf("offset");
+vector sample       = @P + @N * offset;
+float dist          = volumesample(1, 0, @P);
+vector distgradient = volumegradient(1, 0, @P);
+
+f@intersect = 1;
+float multiply = chf("multiply");
+@P = (@P + (distgradient * multiply));
+
+v@velocity = point(3, "v",     @ptnum);
+v@speed    = point(3, "speed", @ptnum);
+
+@P = @P + (normalize(v@velocity)) * v@speed / 24;</code></pre>
+      </div>
+      <div class="divider"></div>
+      <p class="desc">Variation: push based on distance from a single control point rather than an SDF volume.</p>
+      <div class="code-block">
+        <div class="code-label">Solver Wrangle — distance-from-point push</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">v@P2         = point(1, "P", 0);
+float dist   = distance(@P, v@P2);
+float ratio  = chf("ratio");
+float min    = chf("min");
+float max    = chf("max");
+float vel    = point(2, "v",     @ptnum);
+float speed  = point(2, "speed", @ptnum);
+
+@P = @P + (@P - v@P2) * -ratio * fit(dist, min, max, 1, 0);
+@P = @P + normalize(vel) * speed / 24;</code></pre>
+      </div>
+      <div class="note">The <code>/ 24</code> converts per-frame velocity to per-second. Adjust to match your project FPS.</div>
+    </div>
+
+
+    <!-- ── Join Node Alternate ── -->
+    <div class="card" id="join-node">
+      <div class="card-header">
+        <h2 class="card-title">Join Node Alternate</h2>
+      </div>
+      <div class="tags">
+        <span class="tag tag-vex">VEX</span>
+        <span class="tag tag-geo">Geometry</span>
+      </div>
+      <p class="desc">
+        Stitches separate line primitives into a continuous polyline regardless of sort order or UV direction. Run the Prim Wrangle first to cache per-prim point counts, then the Point Wrangle to build the connections.
+      </p>
+      <div class="code-block">
+        <div class="code-label">1 — Prim Wrangle</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">int primpoints_count[] = primpoints(0, @primnum);
+i@primpoints_count     = len(primpoints_count);</code></pre>
+      </div>
+      <div class="code-block">
+        <div class="code-label">2 — Point Wrangle</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">int primpoints_count[];
+int sum_of_points[];
+int sum_of = 0;
+
+for (int i = 0; i &lt; @numprim; i++) {
+    int sum = prim(0, "primpoints_count", i);
+    push(sum_of_points, sum);
+    push(primpoints_count, sum);
+
+    int sum_of_points_last = sum_of_points[-1:][0];
+    sum_of += sum_of_points_last;
+
+    addprim(0, "polyline", sum_of - 1, sum_of);
+}</code></pre>
+      </div>
+      <div class="note">Finish with a PolyPath SOP. No Reverse nodes needed — unsorted primitives are handled cleanly.</div>
+    </div>
+
+
+    <!-- ── Hashmaps / Dicts ── -->
+    <div class="card" id="hashmaps">
+      <div class="card-header">
+        <h2 class="card-title">Hashmaps / Dictionaries</h2>
+      </div>
+      <div class="tags">
+        <span class="tag tag-vex">VEX</span>
+      </div>
+      <p class="desc">
+        VEX dictionaries (<code>d@</code>) give you string-keyed lookup tables. Handy for shot-context switching when there's no pipeline metadata — build the map once, read the current shot code, and index into it to drive switches.
+      </p>
+      <div class="code-block">
+        <div class="code-label">Detail Wrangle — shot-context switcher</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">d@hashmap = set(
+    "shotname_1", 1,
+    "shotname_2", 2
+);
+
+s@shot_ref      = chs("/obj/RefNode/ShotCode");
+string shot_ref = s@shot_ref;
+
+i@switcheroo = getcomp(d@hashmap, shot_ref, 0);</code></pre>
+      </div>
+      <div class="note">Feed <code>i@switcheroo</code> into a Switch SOP. Extend the dictionary with as many shots as needed — no keyframes, no per-shot branches.</div>
+    </div>
+
+
+    <!-- ── HScript Procedural Attributes ── -->
+    <div class="card" id="hscript-attrs">
+      <div class="card-header">
+        <h2 class="card-title">Procedural Attribute Adjustment with HScript</h2>
+      </div>
+      <div class="tags">
+        <span class="tag tag-hscript">HScript</span>
+      </div>
+      <p class="desc">
+        Paste these expressions directly into parameter fields instead of keyframing. They produce clean 0–1 ramps and compound motions that work across many shots without touching the Graph Editor.
+      </p>
+      <div class="code-block">
+        <div class="code-label">HScript — 0 → 1 ramp over shot length</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fit(@Frame, $FSTART, $FEND, 0, 1)</code></pre>
+      </div>
+      <div class="code-block">
+        <div class="code-label">HScript — rise-and-fall curve (peak at midpoint)</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">fit(@Frame, $FSTART, $FEND-120, 0, 1) + fit(@Frame, $FSTART+120, $FEND, 0, -1)</code></pre>
+      </div>
+      <div class="note">Use <a href="https://www.wolframalpha.com" target="_blank" rel="noopener">WolframAlpha</a> to visualise more complex equations before committing them to a parameter. Works particularly well across many shots where keyframing becomes unmanageable.</div>
+    </div>
+
+
+    <!-- ── Culling ── -->
+    <div class="card" id="culling">
+      <div class="card-header">
+        <h2 class="card-title">Culling with toNDC</h2>
+      </div>
+      <div class="tags">
+        <span class="tag tag-vex">VEX</span>
+        <span class="tag tag-sim">Simulation</span>
+      </div>
+      <p class="desc">
+        Culling off-screen geometry is one of the most effective ways to cut RAM during simulation. <code>toNDC</code> converts world positions to camera space — anything outside <code>[0, 1]</code> (with margin) is off-screen and safe to blast.
+      </p>
+      <div class="code-block">
+        <div class="code-label">Point Wrangle — camera frustum cull</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">string camera = chsop("camera");
+vector campos = toNDC(camera, @P - chv("offset"));
+
+if (campos.x &gt; 1.05 || campos.x &lt; -0.05 ||
+    campos.y &gt; 1.05 || campos.y &lt; -0.05) {
+    @group_blah = 1;
+}</code></pre>
+      </div>
+      <div class="note">
+        <strong>Important:</strong> do not run this directly as a POP/Geo wrangle inside a solver — use a SOP Solver with a Gas Intermittent to fire it once per frame.
+        <br /><br />
+        For pyro: combine vel and density with a VDB Combine intersection to clip vel to density bounds. This keeps pyro from simulating in invisible regions.
+      </div>
+    </div>
+
+
+    <!-- ── Packed BBox ── -->
+    <div class="card" id="packed-bbox">
+      <div class="card-header">
+        <h2 class="card-title">Bounding Box Volume from Packed Objects</h2>
+      </div>
+      <div class="tags">
+        <span class="tag tag-vex">VEX</span>
+        <span class="tag tag-geo">Geometry</span>
+      </div>
+      <p class="desc">
+        Packed geometry doesn't have its volume calculated by default and the Measure SOP fails silently on it. Reading the intrinsic bounds directly gives a fast approximate volume — enough to drive "blast anything under N m³" logic.
+      </p>
+      <div class="code-block">
+        <div class="code-label">Prim Wrangle — approximate AABB volume of packed objects</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">float bounds[] = primintrinsic(0, "bounds", 0);
+f@vol = abs(bounds[0] - bounds[1])
+      * abs(bounds[2] - bounds[3])
+      * abs(bounds[4] - bounds[5]);</code></pre>
+      </div>
+      <div class="note">This is an AABB approximation. For millions of packed pieces it's fast enough to drive logic like "blast anything under 1 m³ before converting to SDF."</div>
+    </div>
+
+
+    <!-- ── Remap Min/Max ── -->
+    <div class="card" id="remap-minmax">
+      <div class="card-header">
+        <h2 class="card-title">Wrangle Remap to Dynamic Min/Max</h2>
+      </div>
+      <div class="tags">
+        <span class="tag tag-vex">VEX</span>
+      </div>
+      <p class="desc">
+        When you need to normalize a value across all points but the range changes every frame, compute min/max dynamically in a Detail Wrangle rather than baking it with an Attribute Promote.
+      </p>
+      <div class="code-block">
+        <div class="code-label">Detail Wrangle — per-frame dynamic min/max</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">float value[];
+
+for (int i = 0; i &lt; @numpt - 1; i++) {
+    float pt_value = point(0, "some_value", i);
+    append(value, pt_value);
+}
+
+f@value_min = min(value);
+f@value_max = max(value);
+// f[]@value = value;  // uncomment to expose the full array</code></pre>
+      </div>
+    </div>
+
+
+    <!-- ── Heightfield Wrangle ── -->
+    <div class="card" id="heightfield">
+      <div class="card-header">
+        <h2 class="card-title">Heightfield Wrangle (Mask &amp; Height Conditionals)</h2>
+      </div>
+      <div class="tags">
+        <span class="tag tag-vex">VEX</span>
+        <span class="tag tag-sim">Simulation</span>
+      </div>
+      <p class="desc">
+        Heightfields are volumes under the hood, so a Volume Wrangle reaches them when the built-in Heightfield nodes fall short. This example samples neighbouring masks and zeroes out regions by height range.
+      </p>
+      <div class="code-block">
+        <div class="code-label">Volume Wrangle — sample masks / height filter</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">@mask -= volumesample(1, "mask", @P);
+
+if (@mask &lt; 0.001) {
+    @mask += volumesample(2, "mask", @P);
+}
+
+if (@height &lt; 50 || @height &gt; 25) {
+    @mask = 0;
+}</code></pre>
+      </div>
+      <div class="note">Heightfields proved very effective as simulation colliders. They require hacking the solver to accept a Terrain Object input, but the performance gains versus surface collisions are significant.</div>
+    </div>
+
+
+    <!-- ── Volume Operations ── -->
+    <div class="card" id="volume-ops">
+      <div class="card-header">
+        <h2 class="card-title">Volume Operations Based on Variables</h2>
+      </div>
+      <div class="tags">
+        <span class="tag tag-vex">VEX</span>
+      </div>
+      <p class="desc">
+        Volume Wrangles work much like Point Wrangles — distance functions, <code>nearpoint</code>, and <code>chramp</code> all apply. This pattern culls density by distance falloff from two separate point sources.
+      </p>
+      <div class="code-block">
+        <div class="code-label">Volume Wrangle — density falloff from two point sources</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">// Falloff from a single point
+float dist       = distance(@P, point(1, "P", 0));
+float dist_remap = fit(dist, 1000, 0, 1, 0);
+float ramped     = chramp("remap_this", dist_remap);
+@density        *= ramped;
+
+// Falloff from nearest point in a cloud
+int near          = nearpoint(2, @P, 1000);
+float dist2       = distance(@P, point(2, "P", near));
+float dist_remap2 = fit(dist2, 1000, 0, 1, 0);
+float ramped2     = chramp("remap_ya", dist_remap2);
+@density          = ramped2;</code></pre>
+      </div>
+      <div class="note">When <code>nearpoint</code> gives unexpected distances, check that you're sampling from the correct context. Convert reference geo to points first if needed.</div>
+    </div>
+
+
+    <!-- ── Aggregate Strings ── -->
+    <div class="card" id="aggregate-strings">
+      <div class="card-header">
+        <h2 class="card-title">Aggregate Strings &amp; Find Them Later</h2>
+      </div>
+      <div class="tags">
+        <span class="tag tag-vex">VEX</span>
+      </div>
+      <p class="desc">
+        Collect all <code>name</code> attributes present at a given frame into a Detail string array, then filter out any geo whose name wasn't present at that reference frame — preventing ghost pieces, moblur blowouts, and unpredictable point counts.
+      </p>
+      <div class="code-block">
+        <div class="code-label">Detail Wrangle — aggregate names (TimeShift to end of shot)</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">s[]@names;
+
+for (int i = 0; i &lt; @numpt - 1; i++) {
+    string nam = point(0, "name", i);
+    append(@names, nam);
+}</code></pre>
+      </div>
+      <div class="code-block">
+        <div class="code-label">Point Wrangle — remove points not in the reference list</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-c">s[]@names = detail(1, "names");
+
+if (find(@names, @name) &lt; 0) {
+    // name not found — keep it
+} else {
+    removepoint(0, @ptnum, 1);
+}</code></pre>
+      </div>
+      <div class="note">Especially useful in RBD setups where objects appear or disappear mid-sim and need consistent naming for motion blur to stay sane.</div>
+    </div>
+
+
+    <!-- ── MPV for EXRs ── -->
+    <div class="card" id="mpv-exr">
+      <div class="card-header">
+        <h2 class="card-title">Playing Back .EXR Sequences with MPV</h2>
+      </div>
+      <div class="tags">
+        <span class="tag tag-tools">Tools</span>
+      </div>
+      <p class="desc">
+        MPV is a free, highly configurable media player that plays back EXR image sequences directly from the command line — no Nuke licence or heavy DCC required.
+      </p>
+      <div class="code-block">
+        <div class="code-label">CMD — play an EXR sequence</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">cd Desktop/mpv
+mpv "mf://C:\Users\VeryCoolUser\Desktop\Project\render\AmazingRender.%04d.exr" --demuxer-lavf-format=image2</code></pre>
+      </div>
+      <div class="note"><code>%04d</code> matches four-digit zero-padded frame numbers (e.g. <code>0001</code>, <code>0042</code>). Adjust the padding to match your render output format.</div>
+    </div>
+
+
+    <!-- ── Audio to Spectrum ── -->
+    <div class="card" id="audio-spectrum">
+      <div class="card-header">
+        <h2 class="card-title">Audio to Spectrum Conversion (FFmpeg)</h2>
+      </div>
+      <div class="tags">
+        <span class="tag tag-tools">Tools</span>
+      </div>
+      <p class="desc">
+        Convert stereo audio into per-frame greyscale spectrum images readable in Houdini as a texture — no CHOPs required. Output is 1×1024 px strips per frame, one folder per channel.
+      </p>
+      <div class="code-block">
+        <div class="code-label">FFmpeg — audio → spectrum image sequence</div>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-bash">ffmpeg -i "C:\Users\YoPath\Music\YoSong.mp3" \
+  -filter_complex \
+    "[0:a]channelsplit=channel_layout=stereo[L][R]; \
+     [L]showspectrum=s=1x1024:scale=lin:start=0:stop=20000:slide=replace:color=intensity,format=gray16be,fps=24[left]; \
+     [R]showspectrum=s=1x1024:scale=lin:start=0:stop=20000:slide=replace:color=intensity,format=gray16be,fps=24[right]" \
+  -map "[left]"  -fps_mode passthrough left\frame_%06d.png \
+  -map "[right]" -fps_mode passthrough right\frame_%06d.png</code></pre>
+      </div>
+      <div class="note">Creates <code>left/</code> and <code>right/</code> folders of 1×1024 greyscale PNGs at 24 fps. Read them back in Houdini with a File SOP or as a texture inside a Volume Wrangle.</div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Footer -->
+<footer class="site-footer">
+  <p>
+    Built by <a href="https://github.com/Fuadex" target="_blank" rel="noopener">Fuadex</a>
+    &nbsp;·&nbsp;
+    <a href="https://github.com/Fuadex/Houdini-VEX-HScript-Python" target="_blank" rel="noopener">View on GitHub</a>
+  </p>
+</footer>
+
+<!-- Back to top -->
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top" aria-label="Back to top">
+  <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+    <path d="M3.5 9.5l4.5-4.5 4.5 4.5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>
+
+<script>
+  // Syntax highlighting
+  document.addEventListener("DOMContentLoaded", () => {
+    hljs.highlightAll();
+  });
+
+  // Copy to clipboard
+  function copyCode(btn) {
+    const code = btn.closest(".code-block").querySelector("pre code");
+    navigator.clipboard.writeText(code.innerText).then(() => {
+      btn.textContent = "Copied!";
+      btn.classList.add("copied");
+      setTimeout(() => {
+        btn.textContent = "Copy";
+        btn.classList.remove("copied");
+      }, 2000);
+    });
+  }
+
+  // Back to top button visibility
+  window.addEventListener("scroll", () => {
+    document.getElementById("backToTop")
+      .classList.toggle("visible", window.scrollY > 320);
+  });
+
+  // Active sidebar link tracking
+  const sections = document.querySelectorAll(".card[id]");
+  const navLinks = document.querySelectorAll(".nav-link");
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = "#" + entry.target.id;
+        navLinks.forEach(link => {
+          link.classList.toggle("active", link.getAttribute("href") === id);
+        });
+      }
+    });
+  }, { rootMargin: "-60px 0px -65% 0px" });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
